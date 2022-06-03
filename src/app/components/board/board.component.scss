@@ -22,8 +22,8 @@
 .board-row {
   display: flex;
 }
-.board-row:nth-child(even) .board-block:nth-child(even),
-.board-row:nth-child(odd) .board-block:nth-child(odd) {
+.board-row:nth-child(even) .board-block:nth-child(odd),
+.board-row:nth-child(odd) .board-block:nth-child(even) {
   background: rgb(77, 66, 60);
   &.can-play {
     background: rgb(19, 94, 124) !important;
