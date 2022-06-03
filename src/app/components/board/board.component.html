@@ -1,0 +1,23 @@
+<div class="current-player">
+  Current player: {{currentPlayer}}
+</div>
+
+<div
+  class="board-container"
+  [ngClass]="currentPlayer == 'black' ? 'rotate-board': ''"
+>
+  <div *ngFor="let row of board" class="board-row">
+    <div
+      *ngFor="let field of row"
+      class="board-block"
+      (click)="selectField(field)"
+      [ngClass]="
+        selectedField && (field.column == selectedField.column && field.row == selectedField.row) ?  'selected ' : ''+
+        selectedField && possibleMoves.includes(field.row+','+field.column) ?  'can-play' : ''
+      "
+    >
+      <img class="piece" *ngIf="field.piece === 'W-P'" src="https://images.chesscomfiles.com/chess-themes/pieces/neo/150/wp.png" alt="">
+      <img class="piece" *ngIf="field.piece === 'B-P'" src="https://images.chesscomfiles.com/chess-themes/pieces/neo/150/bp.png" alt="">
+    </div>
+  </div>
+</div>
