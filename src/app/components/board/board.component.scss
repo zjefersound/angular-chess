@@ -36,10 +36,10 @@
   width: var(--block-size);
   background: rgb(231, 217, 195);
   &.selected {
-    border: 2px solid rgb(219, 138, 31);
+    background: rgb(219, 138, 31) !important;
   }
   &.can-play {
-    background: rgb(77, 189, 233) !important;
+    background: rgb(77, 189, 233);
   }
 
   .piece {

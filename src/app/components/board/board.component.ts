@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { ChessField } from 'src/app/common/chess-field';
 import { BoardService } from 'src/app/services/board.service';
 
 @Component({
@@ -8,9 +9,9 @@ import { BoardService } from 'src/app/services/board.service';
 })
 export class BoardComponent implements OnInit {
   size = 8;
-  board: any[][] = [];
-  selectedField: any = null;
-  possibleMoves: any[] = [];
+  board: ChessField[][] = [];
+  selectedField: ChessField | null = null;
+  possibleMoves: string[] = [];
   currentPlayer: 'black' | 'white' = 'white';
   rotateBoard: boolean = false;
 
@@ -27,7 +28,7 @@ export class BoardComponent implements OnInit {
     this.possibleMoves = [];
   }
 
-  selectField(field: any) {
+  selectField(field: ChessField) {
     const hasSelectedSameField =
       this.selectedField &&
       field.column == this.selectedField.column &&
@@ -45,7 +46,7 @@ export class BoardComponent implements OnInit {
     if (isPlaying) {
       this.board = this.boardService.movePiece(
         this.board,
-        this.selectedField,
+        this.selectedField as ChessField,
         field
       );
       this.currentPlayer = this.currentPlayer === 'white' ? 'black' : 'white';

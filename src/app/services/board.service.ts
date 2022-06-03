@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { ChessField } from '../common/chess-field';
 
 @Injectable({
   providedIn: 'root',
@@ -22,7 +23,7 @@ export class BoardService {
       });
   }
 
-  fillRow(row: any[], piece: string) {
+  fillRow(row: ChessField[], piece: string) {
     return row.map((field) => {
       return {
         ...field,
@@ -31,8 +32,8 @@ export class BoardService {
     });
   }
 
-  fillBoard(board: any[][]) {
-    const filledBoard: any[][] = board.map((row, index) => {
+  fillBoard(board: ChessField[][]) {
+    const filledBoard: ChessField[][] = board.map((row, index) => {
       if (index == 0) return this.fillRow(row, 'B-P');
       else if (index == board.length - 1) return this.fillRow(row, 'W-P');
       else return row;
@@ -41,13 +42,12 @@ export class BoardService {
   }
 
   getMoves(
-    board: any[][],
-    currentField: any,
+    board: ChessField[][],
+    currentField: ChessField,
     currentPlayer: 'black' | 'white'
   ) {
     const column = currentField.column;
     const row = currentField.row;
-    console.log('currentField', currentField, row, column);
     const moves = [
       [row - 1, column - 1],
       [row - 1, column],
@@ -74,15 +74,15 @@ export class BoardService {
         const piece = currentField?.piece;
         const hasPiecesAround = !(piece === board[row][column]?.piece);
         const isAllowedToMove =
-          (currentPlayer == 'white' && piece.slice('-')[0] == 'W') ||
-          (currentPlayer == 'black' && piece.slice('-')[0] == 'B');
+          (currentPlayer == 'white' && piece?.split('-')[0] == 'W') ||
+          (currentPlayer == 'black' && piece?.split('-')[0] == 'B');
         return hasPiecesAround && isAllowedToMove;
       });
 
     return validMoves;
   }
 
-  movePiece(board: any[][], currentField: any, targetField: any) {
+  movePiece(board: ChessField[][], currentField: ChessField, targetField: ChessField) {
     const updatedBoard = board;
 
     updatedBoard[currentField.row][currentField.column] = {
