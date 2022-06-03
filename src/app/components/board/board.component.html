@@ -12,8 +12,9 @@
       class="board-block"
       (click)="selectField(field)"
       [ngClass]="
-        selectedField && (field.column == selectedField.column && field.row == selectedField.row) ?  'selected ' : ''+
-        selectedField && possibleMoves.includes(field.row+','+field.column) ?  'can-play' : ''
+        (selectedField && (field.column == selectedField.column && field.row == selectedField.row) ?  'selected ' : '')+
+        (selectedField && possibleMoves.includes(field.row+','+field.column) ?  'can-play ' : '')+
+        (selectedField && field.piece ?  'will-capture ' : '')
       "
     >
       <img class="piece" *ngIf="field.piece === 'W-P'" src="https://images.chesscomfiles.com/chess-themes/pieces/neo/150/wp.png" alt="">

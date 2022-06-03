@@ -27,6 +27,9 @@
   background: rgb(77, 66, 60);
   &.can-play {
     background: rgb(19, 94, 124) !important;
+    &.will-capture {
+      background: rgb(207, 76, 76) !important;
+    }
   }
 }
 
@@ -40,6 +43,9 @@
   }
   &.can-play {
     background: rgb(77, 189, 233);
+    &.will-capture {
+      background: rgb(207, 76, 76) !important;
+    }
   }
 
   .piece {
