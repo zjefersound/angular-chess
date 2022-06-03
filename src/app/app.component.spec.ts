@@ -26,10 +26,4 @@ describe('AppComponent', () => {
     expect(app.title).toEqual('chess-angular');
   });
 
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.content span')?.textContent).toContain('chess-angular app is running!');
-  });
 });
