@@ -1,10 +1,8 @@
-<div class="current-player">
-  Current player: {{currentPlayer}}
-</div>
+<div class="current-player">Current player: {{ currentPlayer }}</div>
 
 <div
   class="board-container"
-  [ngClass]="rotateBoard && currentPlayer == 'black' ? 'rotate-board': ''"
+  [ngClass]="rotateBoard && currentPlayer == 'black' ? 'rotate-board' : ''"
 >
   <div *ngFor="let row of board" class="board-row">
     <div
@@ -12,13 +10,24 @@
       class="board-block"
       (click)="selectField(field)"
       [ngClass]="
-        (selectedField && (field.column == selectedField.column && field.row == selectedField.row) ?  'selected ' : '')+
-        (selectedField && possibleMoves.includes(field.row+','+field.column) ?  'can-play ' : '')+
-        (selectedField && field.piece ?  'will-capture ' : '')
+        (selectedField &&
+        field.column == selectedField.column && field.row == selectedField.row
+          ? 'selected '
+          : '') +
+        (selectedField && possibleMoves.includes(field.row + ',' + field.column)
+          ? 'can-play '
+          : '') +
+        (selectedField && field.piece ? 'will-capture ' : '')
       "
     >
-      <img class="piece" *ngIf="field.piece === 'W-P'" src="https://images.chesscomfiles.com/chess-themes/pieces/neo/150/wp.png" alt="">
-      <img class="piece" *ngIf="field.piece === 'B-P'" src="https://images.chesscomfiles.com/chess-themes/pieces/neo/150/bp.png" alt="">
+      <img
+        class="piece"
+        *ngIf="field.piece"
+        src="https://images.chesscomfiles.com/chess-themes/pieces/neo/150/{{
+          field.piece.toLocaleLowerCase().replace('-', '')
+        }}.png"
+        alt=""
+      />
     </div>
   </div>
 </div>

@@ -18,7 +18,9 @@ export class PieceMovement {
   private clearFieldsWithObstacles(move: number[], piece: string) {
     const row = move[0];
     const column = move[1];
-    const hasPiecesAround = !(piece === this.board[row][column]?.piece);
+    const hasPiecesAround = !(
+      piece?.split('-')[0] === this.board[row][column]?.piece?.split('-')[0]
+    );
     const isAllowedToMove =
       (this.currentPlayer == 'white' && piece?.split('-')[0] == 'W') ||
       (this.currentPlayer == 'black' && piece?.split('-')[0] == 'B');
@@ -44,18 +46,26 @@ export class PieceMovement {
       const tempRow = move[0];
       const tempColumn = move[1];
       const whitePlays = this.currentPlayer === 'white';
-      const isFirstMove = !hasBeenMoved
-      const sameColumn = tempColumn === column
-      const hasPiece = this.board?.[tempRow]?.[tempColumn]?.piece
-      const hasPieceInTheSameColumn = (hasPiece && sameColumn)
+      const isFirstMove = !hasBeenMoved;
+      const sameColumn = tempColumn === column;
+      const hasPiece = this.board?.[tempRow]?.[tempColumn]?.piece;
+      const hasPieceInTheSameColumn = hasPiece && sameColumn;
 
       //hasn't moved a piece or can only jump one
-      const canOnlyJumpOne = (tempRow > row - 2 && tempRow < row + 2)
-      const allowJumpTwo = (isFirstMove || canOnlyJumpOne);
+      const hasPieceInBetween =
+        this.board?.[row + (whitePlays ? -1 : 1)]?.[tempColumn]?.piece &&
+        sameColumn;
+      const canOnlyJumpOne = tempRow > row - 2 && tempRow < row + 2;
+      const allowJumpTwo =
+        (isFirstMove && !hasPieceInBetween) || canOnlyJumpOne;
       const isMovingForward = whitePlays ? tempRow < row : tempRow > row;
 
       const isRowInBoard = tempRow >= 0 && tempRow <= this.board.length - 1;
-      const isRowValid = !hasPieceInTheSameColumn && isRowInBoard && isMovingForward && allowJumpTwo;
+      const isRowValid =
+        !hasPieceInTheSameColumn &&
+        isRowInBoard &&
+        isMovingForward &&
+        allowJumpTwo;
       const isColumnValid = hasPiece || sameColumn;
 
       return isRowValid && isColumnValid && !!piece;

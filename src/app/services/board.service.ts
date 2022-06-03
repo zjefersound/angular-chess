@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ChessField } from '../common/chess-field';
 import { PieceMovement } from '../common/piece-movement';
-
+import { Color, Piece } from '../models/app-enums.model';
 @Injectable({
   providedIn: 'root',
 })
@@ -25,7 +25,27 @@ export class BoardService {
       });
   }
 
-  fillRow(row: ChessField[], piece: string) {
+  fillPieces(row: ChessField[], color: 'white' | 'black') {
+    const pieces = [
+      Piece.Rook,
+      Piece.Knight,
+      Piece.Bishop,
+      Piece.Queen,
+      Piece.King,
+      Piece.Bishop,
+      Piece.Knight,
+      Piece.Rook,
+    ];
+    return row.map((field, index) => {
+      return {
+        ...field,
+        piece: Color[color] + '-' + pieces[index],
+      };
+    });
+  }
+
+  fillPawns(row: ChessField[], color: 'black' | 'white') {
+    const piece = Color[color] + '-' + Piece.Pawn;
     return row.map((field) => {
       return {
         ...field,
@@ -36,8 +56,11 @@ export class BoardService {
 
   fillBoard(board: ChessField[][]) {
     const filledBoard: ChessField[][] = board.map((row, index) => {
-      if (index == 0 + 1) return this.fillRow(row, 'B-P');
-      else if (index == board.length - 1 - 1) return this.fillRow(row, 'W-P');
+      if (index == 0) return this.fillPieces(row, 'black');
+      if (index == 0 + 1) return this.fillPawns(row, 'black');
+      else if (index == board.length - 1) return this.fillPieces(row, 'white');
+      else if (index == board.length - 1 - 1)
+        return this.fillPawns(row, 'white');
       else return row;
     });
     return filledBoard;
@@ -48,7 +71,7 @@ export class BoardService {
     currentField: ChessField,
     currentPlayer: 'black' | 'white'
   ) {
-    const pieceMovement = new PieceMovement(board, currentField, currentPlayer)
+    const pieceMovement = new PieceMovement(board, currentField, currentPlayer);
     const moves = pieceMovement.pawn();
 
     return moves;
