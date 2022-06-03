@@ -4,7 +4,7 @@
 
 <div
   class="board-container"
-  [ngClass]="currentPlayer == 'black' ? 'rotate-board': ''"
+  [ngClass]="rotateBoard && currentPlayer == 'black' ? 'rotate-board': ''"
 >
   <div *ngFor="let row of board" class="board-row">
     <div

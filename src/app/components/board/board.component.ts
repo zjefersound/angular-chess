@@ -12,6 +12,7 @@ export class BoardComponent implements OnInit {
   selectedField: any = null;
   possibleMoves: any[] = [];
   currentPlayer: 'black' | 'white' = 'white';
+  rotateBoard: boolean = false;
 
   constructor(private boardService: BoardService) {}
 
@@ -37,11 +38,17 @@ export class BoardComponent implements OnInit {
       return;
     }
 
-    const isPlaying = this.possibleMoves.length && this.possibleMoves.includes(field.row+','+field.column)
+    const isPlaying =
+      this.possibleMoves.length &&
+      this.possibleMoves.includes(field.row + ',' + field.column);
 
-    if(isPlaying) {
-      this.board = this.boardService.movePiece(this.board, this.selectedField, field)
-      this.currentPlayer= this.currentPlayer === 'white' ? 'black' : 'white'
+    if (isPlaying) {
+      this.board = this.boardService.movePiece(
+        this.board,
+        this.selectedField,
+        field
+      );
+      this.currentPlayer = this.currentPlayer === 'white' ? 'black' : 'white';
       this.unselectField();
       return;
     }
