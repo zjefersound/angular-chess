@@ -166,6 +166,35 @@ export class PieceMovement {
     return validMoves;
   }
 
+  knight() {
+    const { column, row, piece } = this.currentField;
+
+    const defaultMoves = [
+      [row-2,column-1],
+      [row-2,column+1],
+      [row+2,column-1],
+      [row+2,column+1],
+      [row-1,column-2],
+      [row+1,column-2],
+      [row-1,column+2],
+      [row+1,column+2],
+    ];
+
+    const clearInvalidFields = (move: number[]) => {
+      const row = move[0];
+      const column = move[1];
+      const isRowValid = row >= 0 && row <= this.board.length - 1;
+      const isColumnValid = column >= 0 && column <= this.board[0].length - 1;
+      return isRowValid && isColumnValid && piece;
+    };
+
+    const validMoves = defaultMoves
+      .filter(clearInvalidFields)
+      .filter((move) => this.clearFieldsWithObstacles(move, piece as string));
+
+    return validMoves;
+  }
+
   getMoves() {
     const pieceType = this.currentField.piece?.split('-')[1];
     switch (pieceType) {
@@ -179,6 +208,8 @@ export class PieceMovement {
         return this.bishop();
       case 'Q':
         return this.queen();
+      case 'N':
+        return this.knight();
 
       default:
         return this.pawn();
