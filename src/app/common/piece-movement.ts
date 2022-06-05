@@ -123,6 +123,49 @@ export class PieceMovement {
     return validMoves;
   }
 
+  bishop() {
+    const { column, row, piece } = this.currentField;
+
+    const defaultMoves = Utils.getDiagonalMoves(this.board, this.currentField, row, column);
+
+    const clearInvalidFields = (move: number[]) => {
+      const row = move[0];
+      const column = move[1];
+      const isRowValid = row >= 0 && row <= this.board.length - 1;
+      const isColumnValid = column >= 0 && column <= this.board[0].length - 1;
+      return isRowValid && isColumnValid && piece;
+    };
+
+    const validMoves = defaultMoves
+      .filter(clearInvalidFields)
+      .filter((move) => this.clearFieldsWithObstacles(move, piece as string));
+
+    return validMoves;
+  }
+
+  queen() {
+    const { column, row, piece } = this.currentField;
+
+    const defaultMoves = [
+      ...Utils.getStraightMoves(this.board, this.currentField, row, column),
+      ...Utils.getDiagonalMoves(this.board, this.currentField, row, column),
+    ];
+
+    const clearInvalidFields = (move: number[]) => {
+      const row = move[0];
+      const column = move[1];
+      const isRowValid = row >= 0 && row <= this.board.length - 1;
+      const isColumnValid = column >= 0 && column <= this.board[0].length - 1;
+      return isRowValid && isColumnValid && piece;
+    };
+
+    const validMoves = defaultMoves
+      .filter(clearInvalidFields)
+      .filter((move) => this.clearFieldsWithObstacles(move, piece as string));
+
+    return validMoves;
+  }
+
   getMoves() {
     const pieceType = this.currentField.piece?.split('-')[1];
     switch (pieceType) {
@@ -132,6 +175,10 @@ export class PieceMovement {
         return this.king();
       case 'R':
         return this.rook();
+      case 'B':
+        return this.bishop();
+      case 'Q':
+        return this.queen();
 
       default:
         return this.pawn();

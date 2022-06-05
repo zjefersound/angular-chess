@@ -34,4 +34,48 @@ export default class Utils {
 
     return moves;
   }
+
+  static getDiagonalMoves(
+    board: ChessField[][],
+    currentField: ChessField,
+    row: number,
+    column: number,
+    previousMoves?: number[][],
+    prevRow?: number,
+    prevColumn?: number,
+  ): number[][] {
+    let moves: number[][] = previousMoves || [];
+
+    function getFieldUtilHasPiece(
+      tempRow: number,
+      tempColumn: number,
+      tempMoves: number[][],
+      tempPrevRow: number,
+      tempPrevColumn: number
+    ) {
+      const newMoves = [...tempMoves, [tempRow, tempColumn]];
+      const updatedMoves = [
+        ...newMoves,
+        ...(board?.[tempRow]?.[tempColumn].piece !== null
+          ? []
+          : Utils.getDiagonalMoves(board, currentField, tempRow, tempColumn, newMoves, tempPrevRow, tempPrevColumn)),
+      ];
+      return updatedMoves;
+    }
+    const mappedPreviousMoves =
+      previousMoves?.map((move) => move[0] + ',' + move[1]) || [];
+
+    const isTopLeftDiagonal = (!prevRow|| prevRow === row+1) && (!prevColumn || prevColumn === column+1)
+    if (isTopLeftDiagonal && !mappedPreviousMoves.includes((row - 1) + ',' + (column-1)) && board?.[row - 1]?.[column-1]) moves = getFieldUtilHasPiece(row - 1, column-1, moves, row, column);
+    const isTopRightDiagonal = (!prevRow|| prevRow === row-1) && (!prevColumn || prevColumn === column+1)
+    if (isTopRightDiagonal && !mappedPreviousMoves.includes((row - 1) + ',' + (column-1)) && board?.[row + 1]?.[column-1]) moves = getFieldUtilHasPiece(row + 1, column-1, moves, row, column);
+
+    const isBottomRightDiagonal = (!prevRow|| prevRow === row-1) && (!prevColumn || prevColumn === column-1)
+    if (isBottomRightDiagonal && !mappedPreviousMoves.includes((row + 1) + ',' + (column+1)) && board?.[row + 1]?.[column+1]) moves = getFieldUtilHasPiece(row + 1, column+1, moves, row, column);
+
+    const isBottomLeftDiagonal = (!prevRow|| prevRow === row+1) && (!prevColumn || prevColumn === column-1)
+    if (isBottomLeftDiagonal && !mappedPreviousMoves.includes((row - 1) + ',' + (column+1)) && board?.[row - 1]?.[column+1]) moves = getFieldUtilHasPiece(row - 1, column+1, moves, row, column);
+
+    return moves;
+  }
 }
