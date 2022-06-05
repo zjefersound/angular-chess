@@ -1,4 +1,4 @@
-export enum Piece {
+export enum EPiece {
   'Pawn' = 'P',
   'Bishop' = 'B',
   'King' = 'K',
@@ -6,7 +6,7 @@ export enum Piece {
   'Rook' = 'R',
   'Knight' = 'N',
 }
-export enum Color {
+export enum EColor {
   'white' = 'W',
   'black' = 'B',
 }

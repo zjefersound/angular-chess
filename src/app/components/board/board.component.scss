@@ -38,6 +38,7 @@
   height: var(--block-size);
   width: var(--block-size);
   background: rgb(231, 217, 195);
+  cursor: pointer;
   &.selected {
     background: rgb(219, 138, 31) !important;
   }

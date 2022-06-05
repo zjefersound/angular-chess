@@ -1,5 +1,5 @@
+import Utils from '../utils/Utils';
 import { ChessField } from './chess-field';
-
 export class PieceMovement {
   private board: ChessField[][];
   private currentField: ChessField;
@@ -102,5 +102,39 @@ export class PieceMovement {
       .filter(clearInvalidFields)
       .filter((move) => this.clearFieldsWithObstacles(move, piece as string));
     return validMoves;
+  }
+  rook() {
+    const { column, row, piece } = this.currentField;
+
+    const defaultMoves = Utils.getStraightMoves(this.board, this.currentField, row, column);
+
+    const clearInvalidFields = (move: number[]) => {
+      const row = move[0];
+      const column = move[1];
+      const isRowValid = row >= 0 && row <= this.board.length - 1;
+      const isColumnValid = column >= 0 && column <= this.board[0].length - 1;
+      return isRowValid && isColumnValid && piece;
+    };
+
+    const validMoves = defaultMoves
+      .filter(clearInvalidFields)
+      .filter((move) => this.clearFieldsWithObstacles(move, piece as string));
+
+    return validMoves;
+  }
+
+  getMoves() {
+    const pieceType = this.currentField.piece?.split('-')[1];
+    switch (pieceType) {
+      case 'P':
+        return this.pawn();
+      case 'K':
+        return this.king();
+      case 'R':
+        return this.rook();
+
+      default:
+        return this.pawn();
+    }
   }
 }

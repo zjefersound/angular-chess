@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ChessField } from '../common/chess-field';
 import { PieceMovement } from '../common/piece-movement';
-import { Color, Piece } from '../models/app-enums.model';
+import { EColor, EPiece } from '../models/app-enums.model';
 @Injectable({
   providedIn: 'root',
 })
@@ -27,25 +27,25 @@ export class BoardService {
 
   fillPieces(row: ChessField[], color: 'white' | 'black') {
     const pieces = [
-      Piece.Rook,
-      Piece.Knight,
-      Piece.Bishop,
-      Piece.Queen,
-      Piece.King,
-      Piece.Bishop,
-      Piece.Knight,
-      Piece.Rook,
+      EPiece.Rook,
+      EPiece.Knight,
+      EPiece.Bishop,
+      EPiece.Queen,
+      EPiece.King,
+      EPiece.Bishop,
+      EPiece.Knight,
+      EPiece.Rook,
     ];
     return row.map((field, index) => {
       return {
         ...field,
-        piece: Color[color] + '-' + pieces[index],
+        piece: EColor[color] + '-' + pieces[index],
       };
     });
   }
 
   fillPawns(row: ChessField[], color: 'black' | 'white') {
-    const piece = Color[color] + '-' + Piece.Pawn;
+    const piece = EColor[color] + '-' + EPiece.Pawn;
     return row.map((field) => {
       return {
         ...field,
@@ -57,10 +57,9 @@ export class BoardService {
   fillBoard(board: ChessField[][]) {
     const filledBoard: ChessField[][] = board.map((row, index) => {
       if (index == 0) return this.fillPieces(row, 'black');
-      if (index == 0 + 1) return this.fillPawns(row, 'black');
+      // else if (index == 0 + 1) return this.fillPawns(row, 'black');
       else if (index == board.length - 1) return this.fillPieces(row, 'white');
-      else if (index == board.length - 1 - 1)
-        return this.fillPawns(row, 'white');
+      // else if (index == board.length - 1 - 1) return this.fillPawns(row, 'white');
       else return row;
     });
     return filledBoard;
@@ -72,8 +71,7 @@ export class BoardService {
     currentPlayer: 'black' | 'white'
   ) {
     const pieceMovement = new PieceMovement(board, currentField, currentPlayer);
-    const moves = pieceMovement.pawn();
-
+    const moves = pieceMovement.getMoves();
     return moves;
   }
 
