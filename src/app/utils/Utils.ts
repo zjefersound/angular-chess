@@ -3,60 +3,38 @@ import { ChessField } from '../common/chess-field';
 export default class Utils {
   static getStraightMoves(
     board: ChessField[][],
-    currentField: ChessField,
-    row: number,
-    column: number,
-    previousMoves?: number[][]
+    currentRow: number,
+    currentColumn: number
   ): number[][] {
-    let moves: number[][] = previousMoves || [];
+    let moves: number[][] = [];
 
-    function getFieldUtilHasPiece(
-      tempRow: number,
-      tempColumn: number,
-      tempMoves: number[][]
+    function getLine(
+      direction: 'top' | 'bottom' | 'left' | 'right',
+      board: ChessField[][],
+      row: number,
+      column: number
     ) {
-      const newMoves = [...tempMoves, [tempRow, tempColumn]];
-      const updatedMoves = [
-        ...newMoves,
-        ...(board?.[tempRow]?.[tempColumn].piece !== null
-          ? []
-          : Utils.getStraightMoves(
-              board,
-              currentField,
-              tempRow,
-              tempColumn,
-              newMoves
-            )),
-      ];
-      return updatedMoves;
-    }
-    const mappedPreviousMoves =
-      previousMoves?.map((move) => move[0] + ',' + move[1]) || [];
+      const field = board[row]?.[column];
+      if (!field) return;
 
-    if (
-      currentField.column === column &&
-      !mappedPreviousMoves.includes(row - 1 + ',' + column) &&
-      board?.[row - 1]?.[column]
-    )
-      moves = getFieldUtilHasPiece(row - 1, column, moves);
-    if (
-      currentField.column === column &&
-      !mappedPreviousMoves.includes(row + 1 + ',' + column) &&
-      board?.[row + 1]?.[column]
-    )
-      moves = getFieldUtilHasPiece(row + 1, column, moves);
-    if (
-      currentField.row === row &&
-      !mappedPreviousMoves.includes(row + ',' + (column - 1)) &&
-      board?.[row]?.[column - 1]
-    )
-      moves = getFieldUtilHasPiece(row, column - 1, moves);
-    if (
-      currentField.row === row &&
-      !mappedPreviousMoves.includes(row + ',' + (column + 1)) &&
-      board?.[row]?.[column + 1]
-    )
-      moves = getFieldUtilHasPiece(row, column + 1, moves);
+      const isCurrentField = row === currentRow && column === currentColumn;
+      if (!isCurrentField) moves = [...moves, [row, column]];
+
+      const hasPiece = Boolean(field.piece);
+      if (!isCurrentField && hasPiece) return;
+
+      const nextRow =
+        row + (direction === 'top' ? -1 : direction === 'bottom' ? 1 : 0);
+      const nextColumn =
+        column + (direction === 'left' ? -1 : direction === 'right' ? 1 : 0);
+
+      getLine(direction, board, nextRow, nextColumn);
+    }
+
+    getLine('top', board, currentRow, currentColumn);
+    getLine('right', board, currentRow, currentColumn);
+    getLine('bottom', board, currentRow, currentColumn);
+    getLine('left', board, currentRow, currentColumn);
 
     return moves;
   }
@@ -78,8 +56,8 @@ export default class Utils {
       const field = board[row]?.[column];
       if (!field) return;
 
-      const isCurrentField = row === currentRow && column === currentColumn
-      if(!isCurrentField) moves = [...moves, [row, column]];
+      const isCurrentField = row === currentRow && column === currentColumn;
+      if (!isCurrentField) moves = [...moves, [row, column]];
 
       const hasPiece = Boolean(field.piece);
       if (!isCurrentField && hasPiece) return;
@@ -94,8 +72,6 @@ export default class Utils {
     getDiagonal('top', 'right', board, currentRow, currentColumn);
     getDiagonal('bottom', 'left', board, currentRow, currentColumn);
     getDiagonal('bottom', 'right', board, currentRow, currentColumn);
-
-    console.log('diag moves', moves);
 
     return moves;
   }

@@ -106,7 +106,7 @@ export class PieceMovement {
   rook() {
     const { column, row, piece } = this.currentField;
 
-    const defaultMoves = Utils.getStraightMoves(this.board, this.currentField, row, column);
+    const defaultMoves = Utils.getStraightMoves(this.board, row, column);
 
     const clearInvalidFields = (move: number[]) => {
       const row = move[0];
@@ -147,7 +147,7 @@ export class PieceMovement {
     const { column, row, piece } = this.currentField;
 
     const defaultMoves = [
-      // ...Utils.getStraightMoves(this.board, this.currentField, row, column),
+      ...Utils.getStraightMoves(this.board, row, column),
       ...Utils.getDiagonalMoves(this.board, row, column),
     ];
 

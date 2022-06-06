@@ -57,9 +57,9 @@ export class BoardService {
   fillBoard(board: ChessField[][]) {
     const filledBoard: ChessField[][] = board.map((row, index) => {
       if (index == 0) return this.fillPieces(row, 'black');
-      // else if (index == 0 + 1) return this.fillPawns(row, 'black');
+      else if (index == 0 + 1) return this.fillPawns(row, 'black');
       else if (index == board.length - 1) return this.fillPieces(row, 'white');
-      // else if (index == board.length - 1 - 1) return this.fillPawns(row, 'white');
+      else if (index == board.length - 1 - 1) return this.fillPawns(row, 'white');
       else return row;
     });
     return filledBoard;
