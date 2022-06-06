@@ -1,4 +1,4 @@
-import { ChessField } from "../common/chess-field";
+import { ChessField } from '../common/chess-field';
 
 export default class Utils {
   static getStraightMoves(
@@ -20,31 +20,59 @@ export default class Utils {
         ...newMoves,
         ...(board?.[tempRow]?.[tempColumn].piece !== null
           ? []
-          : Utils.getStraightMoves(board, currentField, tempRow, tempColumn, newMoves)),
+          : Utils.getStraightMoves(
+              board,
+              currentField,
+              tempRow,
+              tempColumn,
+              newMoves
+            )),
       ];
       return updatedMoves;
     }
     const mappedPreviousMoves =
       previousMoves?.map((move) => move[0] + ',' + move[1]) || [];
 
-    if (currentField.column === column && !mappedPreviousMoves.includes((row - 1) + ',' + column) && board?.[row - 1]?.[column]) moves = getFieldUtilHasPiece(row - 1, column, moves);
-    if (currentField.column === column && !mappedPreviousMoves.includes((row + 1) + ',' + column) && board?.[row + 1]?.[column]) moves = getFieldUtilHasPiece(row + 1, column, moves);
-    if (currentField.row === row &&!mappedPreviousMoves.includes(row+ ',' + (column - 1)) && board?.[row]?.[column-1]) moves = getFieldUtilHasPiece(row, column-1, moves);
-    if (currentField.row === row && !mappedPreviousMoves.includes(row+ ',' + (column + 1)) && board?.[row]?.[column+1]) moves = getFieldUtilHasPiece(row, column+1, moves);
+    if (
+      currentField.column === column &&
+      !mappedPreviousMoves.includes(row - 1 + ',' + column) &&
+      board?.[row - 1]?.[column]
+    )
+      moves = getFieldUtilHasPiece(row - 1, column, moves);
+    if (
+      currentField.column === column &&
+      !mappedPreviousMoves.includes(row + 1 + ',' + column) &&
+      board?.[row + 1]?.[column]
+    )
+      moves = getFieldUtilHasPiece(row + 1, column, moves);
+    if (
+      currentField.row === row &&
+      !mappedPreviousMoves.includes(row + ',' + (column - 1)) &&
+      board?.[row]?.[column - 1]
+    )
+      moves = getFieldUtilHasPiece(row, column - 1, moves);
+    if (
+      currentField.row === row &&
+      !mappedPreviousMoves.includes(row + ',' + (column + 1)) &&
+      board?.[row]?.[column + 1]
+    )
+      moves = getFieldUtilHasPiece(row, column + 1, moves);
 
     return moves;
   }
 
   static getDiagonalMoves(
     board: ChessField[][],
-    currentField: ChessField,
     row: number,
     column: number,
     previousMoves?: number[][],
     prevRow?: number,
-    prevColumn?: number,
+    prevColumn?: number
   ): number[][] {
     let moves: number[][] = previousMoves || [];
+    const mappedPreviousMoves =
+      previousMoves?.map((move) => move[0] + ',' + move[1]) || [];
+    console.log('mappedPreviousMoves', mappedPreviousMoves);
 
     function getFieldUtilHasPiece(
       tempRow: number,
@@ -53,28 +81,62 @@ export default class Utils {
       tempPrevRow: number,
       tempPrevColumn: number
     ) {
+      const isAddedToPreviousMoves = mappedPreviousMoves.includes(
+        tempRow + ',' + tempColumn
+      );
+      if (isAddedToPreviousMoves) return tempMoves;
       const newMoves = [...tempMoves, [tempRow, tempColumn]];
       const updatedMoves = [
         ...newMoves,
         ...(board?.[tempRow]?.[tempColumn].piece !== null
           ? []
-          : Utils.getDiagonalMoves(board, currentField, tempRow, tempColumn, newMoves, tempPrevRow, tempPrevColumn)),
+          : Utils.getDiagonalMoves(
+              board,
+              tempRow,
+              tempColumn,
+              newMoves,
+              tempPrevRow,
+              tempPrevColumn
+            )),
       ];
       return updatedMoves;
     }
-    const mappedPreviousMoves =
-      previousMoves?.map((move) => move[0] + ',' + move[1]) || [];
 
-    const isTopLeftDiagonal = (!prevRow|| prevRow === row+1) && (!prevColumn || prevColumn === column+1)
-    if (isTopLeftDiagonal && !mappedPreviousMoves.includes((row - 1) + ',' + (column-1)) && board?.[row - 1]?.[column-1]) moves = getFieldUtilHasPiece(row - 1, column-1, moves, row, column);
-    const isTopRightDiagonal = (!prevRow|| prevRow === row-1) && (!prevColumn || prevColumn === column+1)
-    if (isTopRightDiagonal && !mappedPreviousMoves.includes((row - 1) + ',' + (column-1)) && board?.[row + 1]?.[column-1]) moves = getFieldUtilHasPiece(row + 1, column-1, moves, row, column);
+    function getDiagonalByDirection(addToRow: number, addToColumn: number) {
+      const rowAdded = row + Number(addToRow);
+      const rowSubtracted = row + Number(addToRow * -1);
+      const columnAdded = column + Number(addToColumn);
+      const columnSubtracted = column + Number(addToColumn * -1);
 
-    const isBottomRightDiagonal = (!prevRow|| prevRow === row-1) && (!prevColumn || prevColumn === column-1)
-    if (isBottomRightDiagonal && !mappedPreviousMoves.includes((row + 1) + ',' + (column+1)) && board?.[row + 1]?.[column+1]) moves = getFieldUtilHasPiece(row + 1, column+1, moves, row, column);
+      const goingToRightDirection =
+        (!prevRow || prevRow === rowSubtracted) &&
+        (!prevColumn || prevColumn === columnSubtracted);
 
-    const isBottomLeftDiagonal = (!prevRow|| prevRow === row+1) && (!prevColumn || prevColumn === column-1)
-    if (isBottomLeftDiagonal && !mappedPreviousMoves.includes((row - 1) + ',' + (column+1)) && board?.[row - 1]?.[column+1]) moves = getFieldUtilHasPiece(row - 1, column+1, moves, row, column);
+      if (!goingToRightDirection) return;
+
+      const isAddedToPreviousMoves = mappedPreviousMoves.includes(
+        rowAdded + ',' + columnAdded
+      );
+      if(isAddedToPreviousMoves) return;
+
+      const doesNextFieldExist = Boolean(board?.[rowAdded]?.[columnAdded]);
+      if(!doesNextFieldExist) return;
+      console.log('*==========================================');
+      console.log('*Debug for: ' + row + ',' + column);
+      console.log('*Came from: ' + prevRow + ',' + prevColumn);
+      console.log('*rowAdded', rowAdded);
+      console.log('*columnAdded', columnAdded);
+      console.log('*isTopLeftDiagonal', goingToRightDirection);
+      console.log('*isAddedToPreviousMoves', isAddedToPreviousMoves);
+      console.log('*doesNextFieldExist', doesNextFieldExist);
+
+      moves = getFieldUtilHasPiece(rowAdded, columnAdded, moves, row, column);
+    }
+    getDiagonalByDirection(-1, -1); //goes to top left
+    getDiagonalByDirection(-1, 1); //goes to top right
+    getDiagonalByDirection(1, -1); //goes to bottom left
+    getDiagonalByDirection(1, 1); //goes to bottom right
+    console.log('diag moves', moves);
 
     return moves;
   }
