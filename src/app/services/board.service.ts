@@ -39,7 +39,7 @@ export class BoardService {
     return row.map((field, index) => {
       return {
         ...field,
-        piece: EColor[color] + '-' + pieces[index],
+        piece: pieces[index] ? EColor[color] + '-' + pieces[index] : null,
       };
     });
   }
@@ -71,27 +71,16 @@ export class BoardService {
     currentPlayer: 'black' | 'white'
   ) {
     const pieceMovement = new PieceMovement(board, currentField, currentPlayer);
-    const moves = pieceMovement.getMoves();
-    return moves;
+    return pieceMovement.getMoves();
   }
 
   movePiece(
     board: ChessField[][],
     currentField: ChessField,
+    currentPlayer:  'black' | 'white',
     targetField: ChessField
   ) {
-    const updatedBoard = board;
-
-    updatedBoard[currentField.row][currentField.column] = {
-      ...currentField,
-      piece: null,
-      hasBeenMoved: false,
-    };
-    updatedBoard[targetField.row][targetField.column] = {
-      ...targetField,
-      piece: currentField.piece,
-      hasBeenMoved: true,
-    };
-    return updatedBoard;
+    const pieceMovement = new PieceMovement(board, currentField, currentPlayer);
+    return pieceMovement.moveTo(targetField);
   }
 }

@@ -27,6 +27,27 @@ export class PieceMovement {
     return hasPiecesAround && isAllowedToMove;
   }
 
+  static movePiece(
+    board: ChessField[][],
+    currentField: ChessField,
+    targetField: ChessField
+  ) {
+    const updatedBoard = board;
+
+    updatedBoard[currentField.row][currentField.column] = {
+      ...currentField,
+      piece: null,
+      hasBeenMoved: false,
+    };
+    updatedBoard[targetField.row][targetField.column] = {
+      ...targetField,
+      piece: currentField.piece,
+      hasBeenMoved: true,
+    };
+
+    return updatedBoard;
+  }
+
   pawn() {
     const { column, row, piece, hasBeenMoved } = this.currentField;
 
@@ -35,8 +56,6 @@ export class PieceMovement {
       [row - 1, column],
       [row - 2, column],
       [row - 1, column + 1],
-      [row, column - 1],
-      [row, column + 1],
       [row + 1, column - 1],
       [row + 1, column],
       [row + 2, column],
@@ -78,28 +97,48 @@ export class PieceMovement {
   }
 
   king() {
-    const { column, row, piece } = this.currentField;
+    const { column, row, piece, hasBeenMoved } = this.currentField;
 
     const defaultMoves = [
       [row - 1, column - 1],
       [row - 1, column],
       [row - 1, column + 1],
+      [row, column - 2],
       [row, column - 1],
       [row, column + 1],
+      [row, column + 2],
       [row + 1, column - 1],
       [row + 1, column],
       [row + 1, column + 1],
     ];
     const clearInvalidFields = (move: number[]) => {
-      const row = move[0];
-      const column = move[1];
-      const isRowValid = row >= 0 && row <= this.board.length - 1;
-      const isColumnValid = column >= 0 && column <= this.board[0].length - 1;
+      const tempRow = move[0];
+      const tempColumn = move[1];
+      const isRowValid = tempRow >= 0 && tempRow <= this.board.length - 1;
+      const isColumnValid =
+        tempColumn >= 0 && tempColumn <= this.board[0].length - 1;
       return isRowValid && isColumnValid && piece;
+    };
+
+    const firstRook = this.board[row]?.[0];
+    const secondRook = this.board[row]?.[this.board[0].length - 1];
+
+    const filterCastleMoves = (move: number[]) => {
+      const isFirstMove = !hasBeenMoved;
+      const tempColumn = move[1];
+      const isFirstCastleAllowed =
+        (isFirstMove && firstRook?.piece && !firstRook?.hasBeenMoved) ||
+        tempColumn > column - 2;
+      const isSecondCastleAllowed =
+        (isFirstMove && secondRook?.piece && !secondRook?.hasBeenMoved) ||
+        tempColumn < column + 2;
+      const isCastleAllowed = isFirstCastleAllowed && isSecondCastleAllowed;
+      return isCastleAllowed;
     };
 
     const validMoves = defaultMoves
       .filter(clearInvalidFields)
+      .filter(filterCastleMoves)
       .filter((move) => this.clearFieldsWithObstacles(move, piece as string));
     return validMoves;
   }
@@ -170,14 +209,14 @@ export class PieceMovement {
     const { column, row, piece } = this.currentField;
 
     const defaultMoves = [
-      [row-2,column-1],
-      [row-2,column+1],
-      [row+2,column-1],
-      [row+2,column+1],
-      [row-1,column-2],
-      [row+1,column-2],
-      [row-1,column+2],
-      [row+1,column+2],
+      [row - 2, column - 1],
+      [row - 2, column + 1],
+      [row + 2, column - 1],
+      [row + 2, column + 1],
+      [row - 1, column - 2],
+      [row + 1, column - 2],
+      [row - 1, column + 2],
+      [row + 1, column + 2],
     ];
 
     const clearInvalidFields = (move: number[]) => {
@@ -214,5 +253,39 @@ export class PieceMovement {
       default:
         return this.pawn();
     }
+  }
+
+  moveTo(targetField: ChessField) {
+    let updatedBoard = PieceMovement.movePiece(
+      this.board,
+      this.currentField,
+      targetField
+    );
+
+    const pieceType = this.currentField.piece?.split('-')[1];
+    if (pieceType === 'K') {
+      const columnFrom = this.currentField.column;
+      const columnTo = targetField.column;
+
+      if (columnTo - columnFrom == 2) {
+        const rook =
+          this.board[this.currentField.row]?.[this.board[0].length - 1];
+        const rookTargetField = { ...targetField, column: columnFrom + 1 };
+        updatedBoard = PieceMovement.movePiece(
+          updatedBoard,
+          rook,
+          rookTargetField
+        );
+      } else if (columnTo - columnFrom == -2) {
+        const rook = this.board[this.currentField.row]?.[0];
+        const rookTargetField = { ...targetField, column: columnFrom - 1 };
+        updatedBoard = PieceMovement.movePiece(
+          updatedBoard,
+          rook,
+          rookTargetField
+        );
+      }
+    }
+    return updatedBoard;
   }
 }

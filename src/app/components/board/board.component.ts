@@ -47,6 +47,7 @@ export class BoardComponent implements OnInit {
       this.board = this.boardService.movePiece(
         this.board,
         this.selectedField as ChessField,
+        this.currentPlayer,
         field
       );
       this.currentPlayer = this.currentPlayer === 'white' ? 'black' : 'white';
