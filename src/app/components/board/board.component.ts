@@ -58,6 +58,6 @@ export class BoardComponent implements OnInit {
     this.selectedField = field;
     this.possibleMoves = this.boardService
       .getMoves(this.board, field, this.currentPlayer)
-      .map((move) => move[0] + ',' + move[1]);
+      .map((move) => move.join(','));
   }
 }

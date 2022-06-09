@@ -1,3 +1,4 @@
+import { EColor } from '../models/app-enums.model';
 import Utils from '../utils/Utils';
 import { ChessField } from './chess-field';
 export class PieceMovement {
@@ -13,6 +14,10 @@ export class PieceMovement {
     this.board = board;
     this.currentField = currentField;
     this.currentPlayer = currentPlayer;
+  }
+
+  setBoard(board: ChessField[][]) {
+    this.board = board;
   }
 
   private clearFieldsWithObstacles(move: number[], piece: string) {
@@ -48,8 +53,8 @@ export class PieceMovement {
     return updatedBoard;
   }
 
-  pawn() {
-    const { column, row, piece, hasBeenMoved } = this.currentField;
+  pawn(field: ChessField, getOnlyCaptureFields?: boolean) {
+    const { column, row, piece, hasBeenMoved } = field;
 
     const defaultMoves = [
       [row - 1, column - 1],
@@ -78,16 +83,22 @@ export class PieceMovement {
       const allowJumpTwo =
         (isFirstMove && !hasPieceInBetween) || canOnlyJumpOne;
       const isMovingForward = whitePlays ? tempRow < row : tempRow > row;
-
       const isRowInBoard = tempRow >= 0 && tempRow <= this.board.length - 1;
-      const isRowValid =
-        !hasPieceInTheSameColumn &&
-        isRowInBoard &&
-        isMovingForward &&
-        allowJumpTwo;
-      const isColumnValid = hasPiece || sameColumn;
 
-      return isRowValid && isColumnValid && !!piece;
+      if (getOnlyCaptureFields) {
+        const isRowValid = isRowInBoard && isMovingForward && canOnlyJumpOne;
+        const isColumnInBoard = tempColumn >= 0 && tempColumn <= this.board[0].length - 1;
+        const isColumnValid = !sameColumn && isColumnInBoard;
+        return isRowValid && isColumnValid && !!piece;
+      } else {
+        const isRowValid =
+          !hasPieceInTheSameColumn &&
+          isRowInBoard &&
+          isMovingForward &&
+          allowJumpTwo;
+        const isColumnValid = hasPiece || sameColumn;
+        return isRowValid && isColumnValid && !!piece;
+      }
     };
 
     const validMoves = defaultMoves
@@ -96,8 +107,8 @@ export class PieceMovement {
     return validMoves;
   }
 
-  king() {
-    const { column, row, piece, hasBeenMoved } = this.currentField;
+  king(field: ChessField) {
+    const { column, row, piece, hasBeenMoved } = field;
 
     const defaultMoves = [
       [row - 1, column - 1],
@@ -142,8 +153,8 @@ export class PieceMovement {
       .filter((move) => this.clearFieldsWithObstacles(move, piece as string));
     return validMoves;
   }
-  rook() {
-    const { column, row, piece } = this.currentField;
+  rook(field: ChessField) {
+    const { column, row, piece } = field;
 
     const defaultMoves = Utils.getStraightMoves(this.board, row, column);
 
@@ -162,8 +173,8 @@ export class PieceMovement {
     return validMoves;
   }
 
-  bishop() {
-    const { column, row, piece } = this.currentField;
+  bishop(field: ChessField) {
+    const { column, row, piece } = field;
 
     const defaultMoves = Utils.getDiagonalMoves(this.board, row, column);
 
@@ -182,8 +193,8 @@ export class PieceMovement {
     return validMoves;
   }
 
-  queen() {
-    const { column, row, piece } = this.currentField;
+  queen(field: ChessField) {
+    const { column, row, piece } = field;
 
     const defaultMoves = [
       ...Utils.getStraightMoves(this.board, row, column),
@@ -205,8 +216,8 @@ export class PieceMovement {
     return validMoves;
   }
 
-  knight() {
-    const { column, row, piece } = this.currentField;
+  knight(field: ChessField) {
+    const { column, row, piece } = field;
 
     const defaultMoves = [
       [row - 2, column - 1],
@@ -234,25 +245,53 @@ export class PieceMovement {
     return validMoves;
   }
 
-  getMoves() {
-    const pieceType = this.currentField.piece?.split('-')[1];
+  getMovesByPiece(field: ChessField, getOnlyCaptureFields?: boolean) {
+    const pieceType = field.piece?.split('-')[1];
     switch (pieceType) {
       case 'P':
-        return this.pawn();
+        return this.pawn(field, getOnlyCaptureFields);
       case 'K':
-        return this.king();
+        return this.king(field);
       case 'R':
-        return this.rook();
+        return this.rook(field);
       case 'B':
-        return this.bishop();
+        return this.bishop(field);
       case 'Q':
-        return this.queen();
+        return this.queen(field);
       case 'N':
-        return this.knight();
+        return this.knight(field);
 
       default:
-        return this.pawn();
+        return this.pawn(field);
     }
+  }
+  getMoves() {
+    return this.getMovesByPiece(this.currentField);
+  }
+
+  getDominatedFieldsByCurrentPlayer() {
+    const pieces = this.board
+      .reduce((allFields, row) => [...allFields, ...row], [])
+      .filter((field) => {
+        const pieceColor = field.piece?.split('-')[0];
+        return pieceColor === EColor[this.currentPlayer];
+      });
+
+    const fieldsDominatedByCurrentPlayer = pieces.reduce(
+      (allPositions, field) => {
+        const moves = this.getMovesByPiece(field, true);
+
+        const positionsToAdd = moves.filter((move) => {
+          return !allPositions
+            .map((move) => move.join(','))
+            .includes(move.join(','));
+        });
+        return [...allPositions, ...positionsToAdd];
+      },
+      [] as number[][]
+    );
+
+    return fieldsDominatedByCurrentPlayer;
   }
 
   moveTo(targetField: ChessField) {

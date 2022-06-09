@@ -5,7 +5,13 @@ import { EColor, EPiece } from '../models/app-enums.model';
 @Injectable({
   providedIn: 'root',
 })
+
 export class BoardService {
+  dominatedFields: IDominatedFields = {
+    black: [],
+    white: [],
+  }
+
   constructor() {}
 
   createBoard(rows: number, columns: number) {
@@ -59,7 +65,8 @@ export class BoardService {
       if (index == 0) return this.fillPieces(row, 'black');
       else if (index == 0 + 1) return this.fillPawns(row, 'black');
       else if (index == board.length - 1) return this.fillPieces(row, 'white');
-      else if (index == board.length - 1 - 1) return this.fillPawns(row, 'white');
+      else if (index == board.length - 1 - 1)
+        return this.fillPawns(row, 'white');
       else return row;
     });
     return filledBoard;
@@ -77,10 +84,18 @@ export class BoardService {
   movePiece(
     board: ChessField[][],
     currentField: ChessField,
-    currentPlayer:  'black' | 'white',
+    currentPlayer: 'black' | 'white',
     targetField: ChessField
   ) {
     const pieceMovement = new PieceMovement(board, currentField, currentPlayer);
-    return pieceMovement.moveTo(targetField);
+    const updatedBoard = pieceMovement.moveTo(targetField);
+    pieceMovement.setBoard(updatedBoard);
+    this.dominatedFields[currentPlayer] = pieceMovement.getDominatedFieldsByCurrentPlayer();
+    return updatedBoard;
   }
+}
+
+interface IDominatedFields {
+  white: number[][];
+  black: number[][];
 }
