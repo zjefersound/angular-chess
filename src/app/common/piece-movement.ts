@@ -31,7 +31,7 @@ export class PieceMovement {
     this.board = board;
   }
 
-  private clearFieldsWithObstacles(move: number[], piece: string) {
+  private clearFieldsWithObstacles(move: number[], piece: string, getOnlyCaptureFields?: boolean) {
     const row = move[0];
     const column = move[1];
     const hasPiecesAround = !(
@@ -40,7 +40,7 @@ export class PieceMovement {
     const isAllowedToMove =
       (this.currentPlayer == 'white' && piece?.split('-')[0] == 'W') ||
       (this.currentPlayer == 'black' && piece?.split('-')[0] == 'B');
-    return hasPiecesAround && isAllowedToMove;
+    return getOnlyCaptureFields || (hasPiecesAround && isAllowedToMove);
   }
 
   static movePiece(
@@ -115,7 +115,7 @@ export class PieceMovement {
 
     const validMoves = defaultMoves
       .filter(clearInvalidFields)
-      .filter((move) => this.clearFieldsWithObstacles(move, piece as string));
+      .filter((move) => this.clearFieldsWithObstacles(move, piece as string, getOnlyCaptureFields));
     return validMoves;
   }
 
@@ -171,10 +171,10 @@ export class PieceMovement {
       .filter(clearInvalidFields)
       .filter(filterCastleMoves)
       .filter(filterAttackedFields)
-      .filter((move) => this.clearFieldsWithObstacles(move, piece as string));
+      .filter((move) => this.clearFieldsWithObstacles(move, piece as string, getOnlyCaptureFields));
     return validMoves;
   }
-  rook(field: ChessField) {
+  rook(field: ChessField, getOnlyCaptureFields?: boolean) {
     const { column, row, piece } = field;
 
     const defaultMoves = Utils.getStraightMoves(this.board, row, column);
@@ -189,12 +189,12 @@ export class PieceMovement {
 
     const validMoves = defaultMoves
       .filter(clearInvalidFields)
-      .filter((move) => this.clearFieldsWithObstacles(move, piece as string));
+      .filter((move) => this.clearFieldsWithObstacles(move, piece as string, getOnlyCaptureFields));
 
     return validMoves;
   }
 
-  bishop(field: ChessField) {
+  bishop(field: ChessField, getOnlyCaptureFields?: boolean) {
     const { column, row, piece } = field;
 
     const defaultMoves = Utils.getDiagonalMoves(this.board, row, column);
@@ -209,12 +209,12 @@ export class PieceMovement {
 
     const validMoves = defaultMoves
       .filter(clearInvalidFields)
-      .filter((move) => this.clearFieldsWithObstacles(move, piece as string));
+      .filter((move) => this.clearFieldsWithObstacles(move, piece as string, getOnlyCaptureFields));
 
     return validMoves;
   }
 
-  queen(field: ChessField) {
+  queen(field: ChessField, getOnlyCaptureFields?: boolean) {
     const { column, row, piece } = field;
 
     const defaultMoves = [
@@ -232,12 +232,12 @@ export class PieceMovement {
 
     const validMoves = defaultMoves
       .filter(clearInvalidFields)
-      .filter((move) => this.clearFieldsWithObstacles(move, piece as string));
+      .filter((move) => this.clearFieldsWithObstacles(move, piece as string, getOnlyCaptureFields));
 
     return validMoves;
   }
 
-  knight(field: ChessField) {
+  knight(field: ChessField, getOnlyCaptureFields?: boolean) {
     const { column, row, piece } = field;
 
     const defaultMoves = [
@@ -261,7 +261,7 @@ export class PieceMovement {
 
     const validMoves = defaultMoves
       .filter(clearInvalidFields)
-      .filter((move) => this.clearFieldsWithObstacles(move, piece as string));
+      .filter((move) => this.clearFieldsWithObstacles(move, piece as string, getOnlyCaptureFields));
 
     return validMoves;
   }
@@ -274,16 +274,16 @@ export class PieceMovement {
       case 'K':
         return this.king(field, getOnlyCaptureFields);
       case 'R':
-        return this.rook(field);
+        return this.rook(field, getOnlyCaptureFields);
       case 'B':
-        return this.bishop(field);
+        return this.bishop(field, getOnlyCaptureFields);
       case 'Q':
-        return this.queen(field);
+        return this.queen(field, getOnlyCaptureFields);
       case 'N':
-        return this.knight(field);
+        return this.knight(field, getOnlyCaptureFields);
 
       default:
-        return this.pawn(field);
+        return this.pawn(field, getOnlyCaptureFields);
     }
   }
   getMoves() {
