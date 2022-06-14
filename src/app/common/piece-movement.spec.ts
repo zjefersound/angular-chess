@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { BoardService } from '../services/board.service';
 import { ChessField } from './chess-field';
+import { Move } from './move';
 import { PieceMovement } from './piece-movement';
 
 describe('PieceMovement', () => {
@@ -19,7 +20,8 @@ describe('PieceMovement', () => {
       black: [],
       white: [],
     }
+    const moveHistory: Move[] = []
 
-    expect(new PieceMovement(board,currentField, currentPlayer, dominatedFields)).toBeTruthy();
+    expect(new PieceMovement(board,currentField, currentPlayer, moveHistory, dominatedFields)).toBeTruthy();
   });
 });

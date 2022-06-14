@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ChessField } from '../common/chess-field';
+import { Move } from '../common/move';
 import { PieceMovement } from '../common/piece-movement';
 import { EColor, EPiece } from '../models/app-enums.model';
 @Injectable({
@@ -7,6 +8,7 @@ import { EColor, EPiece } from '../models/app-enums.model';
 })
 
 export class BoardService {
+  moveHistory: Move[] = []
   dominatedFields: IDominatedFields = {
     black: [],
     white: [],
@@ -77,7 +79,7 @@ export class BoardService {
     currentField: ChessField,
     currentPlayer: 'black' | 'white'
   ) {
-    const pieceMovement = new PieceMovement(board, currentField, currentPlayer, this.dominatedFields);
+    const pieceMovement = new PieceMovement(board, currentField, currentPlayer, this.moveHistory, this.dominatedFields);
     return pieceMovement.getMoves();
   }
 
@@ -87,8 +89,10 @@ export class BoardService {
     currentPlayer: 'black' | 'white',
     targetField: ChessField
   ) {
-    const pieceMovement = new PieceMovement(board, currentField, currentPlayer, this.dominatedFields);
+    const pieceMovement = new PieceMovement(board, currentField, currentPlayer, this.moveHistory, this.dominatedFields);
     const updatedBoard = pieceMovement.moveTo(targetField);
+    this.moveHistory = this.moveHistory.concat({ fieldFrom: currentField, fieldTo: targetField})
+
     pieceMovement.setBoard(updatedBoard);
     this.dominatedFields[currentPlayer] = pieceMovement.getDominatedFieldsByCurrentPlayer();
     return updatedBoard;

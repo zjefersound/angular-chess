@@ -1,6 +1,7 @@
-import { EColor } from '../models/app-enums.model';
+import { EColor, EPiece } from '../models/app-enums.model';
 import Utils from '../utils/Utils';
 import { ChessField } from './chess-field';
+import { Move } from './move';
 
 interface IDominatedFields {
   white: number[][];
@@ -14,16 +15,19 @@ export class PieceMovement {
     black: [],
     white: [],
   };
+  private moveHistory: Move[] = [];
 
   constructor(
     board: ChessField[][],
     currentField: ChessField,
     currentPlayer: 'black' | 'white',
+    moveHistory: Move[],
     dominatedFields: IDominatedFields
   ) {
     this.board = board;
     this.currentField = currentField;
     this.currentPlayer = currentPlayer;
+    this.moveHistory = moveHistory;
     this.dominatedFields = dominatedFields;
   }
 
@@ -31,7 +35,11 @@ export class PieceMovement {
     this.board = board;
   }
 
-  private clearFieldsWithObstacles(move: number[], piece: string, getOnlyCaptureFields?: boolean) {
+  private clearFieldsWithObstacles(
+    move: number[],
+    piece: string,
+    getOnlyCaptureFields?: boolean
+  ) {
     const row = move[0];
     const column = move[1];
     const hasPiecesAround = !(
@@ -108,14 +116,32 @@ export class PieceMovement {
           isRowInBoard &&
           isMovingForward &&
           allowJumpTwo;
-        const isColumnValid = hasPiece || sameColumn;
+        let allowEnPassant = false;
+        const lastMove = this.moveHistory[this.moveHistory.length - 1];
+        if (lastMove) {
+          const hasPieceBeside = lastMove.fieldTo.row === field.row;
+          const hasPieceJumpedTwo =
+            Math.abs(lastMove.fieldTo.row - lastMove.fieldFrom.row) == 2;
+          const canCaptureField =
+            tempColumn === lastMove.fieldTo.column &&
+            tempRow === lastMove.fieldTo.row + (whitePlays ? -1 : 1);
+          allowEnPassant =
+            hasPieceBeside && hasPieceJumpedTwo && canCaptureField;
+        }
+        const isColumnValid = hasPiece || allowEnPassant || sameColumn;
         return isRowValid && isColumnValid && !!piece;
       }
     };
 
     const validMoves = defaultMoves
       .filter(clearInvalidFields)
-      .filter((move) => this.clearFieldsWithObstacles(move, piece as string, getOnlyCaptureFields));
+      .filter((move) =>
+        this.clearFieldsWithObstacles(
+          move,
+          piece as string,
+          getOnlyCaptureFields
+        )
+      );
     return validMoves;
   }
 
@@ -150,10 +176,16 @@ export class PieceMovement {
       const isFirstMove = !hasBeenMoved;
       const tempColumn = move[1];
       const isFirstCastleAllowed =
-        (isFirstMove && firstRook?.piece && !firstRook?.hasBeenMoved && !this.board[row]?.[column-1].piece) ||
+        (isFirstMove &&
+          firstRook?.piece &&
+          !firstRook?.hasBeenMoved &&
+          !this.board[row]?.[column - 1].piece) ||
         tempColumn > column - 2;
       const isSecondCastleAllowed =
-        (isFirstMove && secondRook?.piece && !secondRook?.hasBeenMoved && !this.board[row]?.[column+1].piece) ||
+        (isFirstMove &&
+          secondRook?.piece &&
+          !secondRook?.hasBeenMoved &&
+          !this.board[row]?.[column + 1].piece) ||
         tempColumn < column + 2;
       const isCastleAllowed = isFirstCastleAllowed && isSecondCastleAllowed;
       return isCastleAllowed;
@@ -171,7 +203,13 @@ export class PieceMovement {
       .filter(clearInvalidFields)
       .filter(filterCastleMoves)
       .filter(filterAttackedFields)
-      .filter((move) => this.clearFieldsWithObstacles(move, piece as string, getOnlyCaptureFields));
+      .filter((move) =>
+        this.clearFieldsWithObstacles(
+          move,
+          piece as string,
+          getOnlyCaptureFields
+        )
+      );
     return validMoves;
   }
   rook(field: ChessField, getOnlyCaptureFields?: boolean) {
@@ -189,7 +227,13 @@ export class PieceMovement {
 
     const validMoves = defaultMoves
       .filter(clearInvalidFields)
-      .filter((move) => this.clearFieldsWithObstacles(move, piece as string, getOnlyCaptureFields));
+      .filter((move) =>
+        this.clearFieldsWithObstacles(
+          move,
+          piece as string,
+          getOnlyCaptureFields
+        )
+      );
 
     return validMoves;
   }
@@ -209,7 +253,13 @@ export class PieceMovement {
 
     const validMoves = defaultMoves
       .filter(clearInvalidFields)
-      .filter((move) => this.clearFieldsWithObstacles(move, piece as string, getOnlyCaptureFields));
+      .filter((move) =>
+        this.clearFieldsWithObstacles(
+          move,
+          piece as string,
+          getOnlyCaptureFields
+        )
+      );
 
     return validMoves;
   }
@@ -232,7 +282,13 @@ export class PieceMovement {
 
     const validMoves = defaultMoves
       .filter(clearInvalidFields)
-      .filter((move) => this.clearFieldsWithObstacles(move, piece as string, getOnlyCaptureFields));
+      .filter((move) =>
+        this.clearFieldsWithObstacles(
+          move,
+          piece as string,
+          getOnlyCaptureFields
+        )
+      );
 
     return validMoves;
   }
@@ -261,7 +317,13 @@ export class PieceMovement {
 
     const validMoves = defaultMoves
       .filter(clearInvalidFields)
-      .filter((move) => this.clearFieldsWithObstacles(move, piece as string, getOnlyCaptureFields));
+      .filter((move) =>
+        this.clearFieldsWithObstacles(
+          move,
+          piece as string,
+          getOnlyCaptureFields
+        )
+      );
 
     return validMoves;
   }
@@ -336,7 +398,26 @@ export class PieceMovement {
     );
 
     const pieceType = this.currentField.piece?.split('-')[1];
-    if (pieceType === 'K') {
+
+    if (pieceType === EPiece.Pawn) {
+      const lastMove = this.moveHistory[this.moveHistory.length - 1];
+      if (lastMove) {
+        const whitePlays = this.currentPlayer === 'white';
+        const hasPieceBeside = lastMove.fieldTo.row === this.currentField.row;
+        if (!hasPieceBeside) return updatedBoard;
+
+        const hasPieceJumpedTwo =
+          Math.abs(lastMove.fieldTo.row - lastMove.fieldFrom.row) == 2;
+
+        if (!hasPieceJumpedTwo) return updatedBoard;
+
+        const isEnPassant = targetField.row === lastMove.fieldTo.row + (whitePlays ? -1 : 1) && targetField.column === lastMove.fieldTo.column;
+
+        if (isEnPassant) {
+          updatedBoard[lastMove.fieldTo.row][lastMove.fieldTo.column].piece = null
+        }
+      }
+    } else if (pieceType === EPiece.King) {
       const columnFrom = this.currentField.column;
       const columnTo = targetField.column;
 
