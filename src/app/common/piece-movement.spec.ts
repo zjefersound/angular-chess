@@ -14,7 +14,12 @@ describe('PieceMovement', () => {
   it('should create an instance', () => {
     const board: ChessField[][] = boardService.createBoard(8,8)
     const currentField: ChessField = { column: 0, row: 0, piece: null, hasBeenMoved: false };
-    const currentPlayer: 'black' | 'white' = 'white'
-    expect(new PieceMovement(board,currentField, currentPlayer)).toBeTruthy();
+    const currentPlayer: 'black' | 'white' = 'white';
+    const dominatedFields = {
+      black: [],
+      white: [],
+    }
+
+    expect(new PieceMovement(board,currentField, currentPlayer, dominatedFields)).toBeTruthy();
   });
 });

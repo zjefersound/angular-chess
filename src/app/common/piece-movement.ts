@@ -1,19 +1,30 @@
 import { EColor } from '../models/app-enums.model';
 import Utils from '../utils/Utils';
 import { ChessField } from './chess-field';
+
+interface IDominatedFields {
+  white: number[][];
+  black: number[][];
+}
 export class PieceMovement {
   private board: ChessField[][];
   private currentField: ChessField;
   private currentPlayer: 'black' | 'white';
+  private dominatedFields: IDominatedFields = {
+    black: [],
+    white: [],
+  };
 
   constructor(
     board: ChessField[][],
     currentField: ChessField,
-    currentPlayer: 'black' | 'white'
+    currentPlayer: 'black' | 'white',
+    dominatedFields: IDominatedFields
   ) {
     this.board = board;
     this.currentField = currentField;
     this.currentPlayer = currentPlayer;
+    this.dominatedFields = dominatedFields;
   }
 
   setBoard(board: ChessField[][]) {
@@ -87,7 +98,8 @@ export class PieceMovement {
 
       if (getOnlyCaptureFields) {
         const isRowValid = isRowInBoard && isMovingForward && canOnlyJumpOne;
-        const isColumnInBoard = tempColumn >= 0 && tempColumn <= this.board[0].length - 1;
+        const isColumnInBoard =
+          tempColumn >= 0 && tempColumn <= this.board[0].length - 1;
         const isColumnValid = !sameColumn && isColumnInBoard;
         return isRowValid && isColumnValid && !!piece;
       } else {
@@ -107,7 +119,7 @@ export class PieceMovement {
     return validMoves;
   }
 
-  king(field: ChessField) {
+  king(field: ChessField, getOnlyCaptureFields?: boolean) {
     const { column, row, piece, hasBeenMoved } = field;
 
     const defaultMoves = [
@@ -138,18 +150,27 @@ export class PieceMovement {
       const isFirstMove = !hasBeenMoved;
       const tempColumn = move[1];
       const isFirstCastleAllowed =
-        (isFirstMove && firstRook?.piece && !firstRook?.hasBeenMoved) ||
+        (isFirstMove && firstRook?.piece && !firstRook?.hasBeenMoved && !this.board[row]?.[column-1].piece) ||
         tempColumn > column - 2;
       const isSecondCastleAllowed =
-        (isFirstMove && secondRook?.piece && !secondRook?.hasBeenMoved) ||
+        (isFirstMove && secondRook?.piece && !secondRook?.hasBeenMoved && !this.board[row]?.[column+1].piece) ||
         tempColumn < column + 2;
       const isCastleAllowed = isFirstCastleAllowed && isSecondCastleAllowed;
       return isCastleAllowed;
     };
 
+    const filterAttackedFields = (move: number[]) => {
+      if (getOnlyCaptureFields) return true;
+      const currentColor = this.currentPlayer === 'white' ? 'black' : 'white';
+      return !this.dominatedFields[currentColor]
+        .map((move) => move.join(','))
+        .includes(move.join(','));
+    };
+
     const validMoves = defaultMoves
       .filter(clearInvalidFields)
       .filter(filterCastleMoves)
+      .filter(filterAttackedFields)
       .filter((move) => this.clearFieldsWithObstacles(move, piece as string));
     return validMoves;
   }
@@ -251,7 +272,7 @@ export class PieceMovement {
       case 'P':
         return this.pawn(field, getOnlyCaptureFields);
       case 'K':
-        return this.king(field);
+        return this.king(field, getOnlyCaptureFields);
       case 'R':
         return this.rook(field);
       case 'B':
@@ -291,6 +312,19 @@ export class PieceMovement {
       [] as number[][]
     );
 
+    console.log('fieldsDominatedByCurrentPlayer ' + EColor[this.currentPlayer]);
+    console.table(
+      this.board.map((row) => {
+        const newRow = row.map((field) => {
+          return fieldsDominatedByCurrentPlayer
+            .map((move) => move.join(','))
+            .includes(field.row + ',' + field.column)
+            ? 'X'
+            : field.piece || '';
+        });
+        return newRow;
+      })
+    );
     return fieldsDominatedByCurrentPlayer;
   }
 

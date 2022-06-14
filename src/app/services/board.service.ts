@@ -77,7 +77,7 @@ export class BoardService {
     currentField: ChessField,
     currentPlayer: 'black' | 'white'
   ) {
-    const pieceMovement = new PieceMovement(board, currentField, currentPlayer);
+    const pieceMovement = new PieceMovement(board, currentField, currentPlayer, this.dominatedFields);
     return pieceMovement.getMoves();
   }
 
@@ -87,7 +87,7 @@ export class BoardService {
     currentPlayer: 'black' | 'white',
     targetField: ChessField
   ) {
-    const pieceMovement = new PieceMovement(board, currentField, currentPlayer);
+    const pieceMovement = new PieceMovement(board, currentField, currentPlayer, this.dominatedFields);
     const updatedBoard = pieceMovement.moveTo(targetField);
     pieceMovement.setBoard(updatedBoard);
     this.dominatedFields[currentPlayer] = pieceMovement.getDominatedFieldsByCurrentPlayer();
