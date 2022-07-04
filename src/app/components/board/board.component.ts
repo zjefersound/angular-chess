@@ -14,6 +14,7 @@ export class BoardComponent implements OnInit {
   possibleMoves: string[] = [];
   currentPlayer: 'black' | 'white' = 'white';
   rotateBoard: boolean = false;
+  isPromoting: boolean = false;
 
   constructor(private boardService: BoardService) {}
 
@@ -28,7 +29,14 @@ export class BoardComponent implements OnInit {
     this.possibleMoves = [];
   }
 
+  willPromote(fieldFrom: ChessField, fieldTo: ChessField) {
+    return (fieldFrom.piece?.[2] === 'P' && (fieldTo.row === 0 || fieldTo.row === 7));
+  }
+
   selectField(field: ChessField) {
+    if (this.isPromoting) {
+      return;
+    }
     const hasSelectedSameField =
       this.selectedField &&
       field.column == this.selectedField.column &&
@@ -46,10 +54,11 @@ export class BoardComponent implements OnInit {
     if (isPlaying) {
       this.board = this.boardService.movePiece(
         this.board,
-        this.selectedField as ChessField,
+        this.selectedField!,
         this.currentPlayer,
         field
       );
+      this.isPromoting = this.willPromote(this.selectedField!, field)
       this.currentPlayer = this.currentPlayer === 'white' ? 'black' : 'white';
       this.unselectField();
       return;

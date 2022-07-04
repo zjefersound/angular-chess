@@ -390,13 +390,8 @@ export class PieceMovement {
     return fieldsDominatedByCurrentPlayer;
   }
 
-  moveTo(targetField: ChessField) {
-    let updatedBoard = PieceMovement.movePiece(
-      this.board,
-      this.currentField,
-      targetField
-    );
-
+  handlePieceExceptions(board: ChessField[][], targetField: ChessField) {
+    let updatedBoard = board;
     const pieceType = this.currentField.piece?.split('-')[1];
 
     if (pieceType === EPiece.Pawn) {
@@ -411,10 +406,13 @@ export class PieceMovement {
 
         if (!hasPieceJumpedTwo) return updatedBoard;
 
-        const isEnPassant = targetField.row === lastMove.fieldTo.row + (whitePlays ? -1 : 1) && targetField.column === lastMove.fieldTo.column;
+        const isEnPassant =
+          targetField.row === lastMove.fieldTo.row + (whitePlays ? -1 : 1) &&
+          targetField.column === lastMove.fieldTo.column;
 
         if (isEnPassant) {
-          updatedBoard[lastMove.fieldTo.row][lastMove.fieldTo.column].piece = null
+          updatedBoard[lastMove.fieldTo.row][lastMove.fieldTo.column].piece =
+            null;
         }
       }
     } else if (pieceType === EPiece.King) {
@@ -440,6 +438,17 @@ export class PieceMovement {
         );
       }
     }
+
+    return updatedBoard;
+  }
+
+  moveTo(targetField: ChessField) {
+    let updatedBoard = PieceMovement.movePiece(
+      this.board,
+      this.currentField,
+      targetField
+    );
+    updatedBoard = this.handlePieceExceptions(updatedBoard, targetField);
     return updatedBoard;
   }
 }

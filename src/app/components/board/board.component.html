@@ -11,7 +11,8 @@
       (click)="selectField(field)"
       [ngClass]="
         (selectedField &&
-        field.column == selectedField.column && field.row == selectedField.row
+        field.column == selectedField.column &&
+        field.row == selectedField.row
           ? 'selected '
           : '') +
         (selectedField && possibleMoves.includes(field.row + ',' + field.column)
@@ -28,6 +29,57 @@
         }}.png"
         alt=""
       />
+      <div
+        *ngIf="
+          true ||
+          isPromoting &&
+          field.piece &&
+          field.piece[2] === 'P' &&
+          (field.row === 0 || field.row === 7)
+        "
+        class="promotion-options"
+      >
+        <div class="piece-option">
+          <img
+            class="piece"
+            *ngIf="field.piece"
+            src="https://images.chesscomfiles.com/chess-themes/pieces/neo/150/{{
+              field.piece[0].toLocaleLowerCase()
+            }}q.png"
+            alt=""
+          />
+        </div>
+        <div class="piece-option">
+          <img
+            class="piece"
+            *ngIf="field.piece"
+            src="https://images.chesscomfiles.com/chess-themes/pieces/neo/150/{{
+              field.piece[0].toLocaleLowerCase()
+            }}r.png"
+            alt=""
+          />
+        </div>
+        <div class="piece-option">
+          <img
+            class="piece"
+            *ngIf="field.piece"
+            src="https://images.chesscomfiles.com/chess-themes/pieces/neo/150/{{
+              field.piece[0].toLocaleLowerCase()
+            }}b.png"
+            alt=""
+          />
+        </div>
+        <div class="piece-option">
+          <img
+            class="piece"
+            *ngIf="field.piece"
+            src="https://images.chesscomfiles.com/chess-themes/pieces/neo/150/{{
+              field.piece[0].toLocaleLowerCase()
+            }}n.png"
+            alt=""
+          />
+        </div>
+      </div>
     </div>
   </div>
 </div>
